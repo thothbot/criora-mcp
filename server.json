@@ -3,7 +3,7 @@
   "name": "com.criora/criora",
   "title": "Criora climate risk",
   "description": "Climate and disaster risk for any place: 7-day weather risk, hazards, climate profile, country risk.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "websiteUrl": "https://criora.com/docs/references/api-and-agents",
   "repository": {
     "url": "https://github.com/thothbot/criora-mcp",

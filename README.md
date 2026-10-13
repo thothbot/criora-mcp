@@ -46,7 +46,7 @@ claude mcp add --transport http criora https://criora.com/mcp
 
 ## Tools
 
-Each tool takes latitude and longitude, or a place name that it resolves to the best match and reports back.
+Place tools take latitude and longitude, or a place name that they resolve to the best match and report back. Every tool is read-only and publishes its output schema; answers at their defaults stay under about 8,000 tokens.
 
 | Tool | What it answers |
 | --- | --- |
@@ -56,7 +56,18 @@ Each tool takes latitude and longitude, or a place name that it resolves to the 
 | `get_climate_profile` | Long-term exposure: floods, sea level rise, heat, drought, water stress and more, with warming and rainfall change projected to 2050 and 2080. |
 | `get_country_profile` | A country's overall risk score and its climate, nature, social, governance and adaptation scores; on request about 160 indicators with world and regional benchmarks. |
 | `compare_countries` | Two to ten countries side by side on overall risk and each dimension, with their ranks. |
+| `rank_countries` | The countries most or least at risk, overall or on one dimension, optionally within a region, subregion or income group, each with its score, risk class and rank. |
 | `find_place` | Coordinates for a place name, when a name is ambiguous. |
+| `search` | Find countries, places and Criora reference pages by name; returns ids for `fetch`. Built to the shape ChatGPT deep research and company knowledge expect. |
+| `fetch` | A readable document for a `search` id (`country:BGD`, `place:<lat>,<lon>`, `page:methodology`), with a link to the Criora page it comes from. |
+
+## Resources
+
+| URI | What it holds |
+| --- | --- |
+| `criora://country/{iso3}` | A country's risk scores and classes as JSON (template; ISO3 codes autocomplete). |
+| `criora://methodology` | How Criora scores country risk (markdown). |
+| `criora://sources` | The datasets behind every answer, with licences (markdown). |
 
 ## Prompts
 
@@ -64,7 +75,7 @@ Each tool takes latitude and longitude, or a place name that it resolves to the 
 | --- | --- | --- |
 | `assess_trip` | `destination`, `dates` (optional) | How risky a trip is: weather risk on the travel days, hazards nearby, seasonal exposure. |
 | `compare_places_to_live` | `places` (semicolon-separated) | Long-term climate exposure and country risk of several places side by side. |
-| `country_briefing` | `country` (name or ISO3) | One country's climate and disaster risk against its region and the world. |
+| `country_briefing` | `country` (name or ISO3, autocompleted) | One country's climate and disaster risk against its region and the world. |
 
 ## Example questions
 
