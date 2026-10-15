@@ -2,7 +2,7 @@
 
 [![Criora MCP connector](https://glama.ai/mcp/connectors/com.criora/criora/badges/score.svg)](https://glama.ai/mcp/connectors/com.criora/criora)
 
-Criora is a hosted, remote [Model Context Protocol](https://modelcontextprotocol.io) server that answers climate and disaster risk questions for any place on Earth: this week's weather risk, hazards happening nearby, long-term climate exposure and country risk.
+Criora is a hosted, remote [Model Context Protocol](https://modelcontextprotocol.io) server that answers climate and disaster risk questions for any place on Earth: this week's weather risk, hazards happening nearby, long-term climate exposure and country risk. In assistants that display MCP Apps, such as Claude, it can also show an interactive map of the place right in the conversation.
 
 - **Endpoint:** `https://criora.com/mcp`
 - **Transport:** Streamable HTTP
@@ -60,6 +60,18 @@ Place tools take latitude and longitude, or a place name that they resolve to th
 | `find_place` | Coordinates for a place name, when a name is ambiguous. |
 | `search` | Find countries, places and Criora reference pages by name; returns ids for `fetch`. Built to the shape ChatGPT deep research and company knowledge expect. |
 | `fetch` | A readable document for a `search` id (`country:BGD`, `place:<lat>,<lon>`, `page:methodology`), with a link to the Criora page it comes from. |
+| `show_risk_map` | An interactive map of a place in the conversation: this week's forecast risk, or the rain, temperature or wind forecast hour by hour, under the hazards nearby. Clients without apps get the same summary as text. |
+
+## Interactive map
+
+`show_risk_map` is an [MCP App](https://modelcontextprotocol.io/docs/extensions/apps): in clients that display apps (Claude on the web, desktop and mobile, and other MCP Apps hosts) it draws a map under the answer, on NASA Blue Marble imagery:
+
+- this week's worst forecast risk with its hazard symbols, or one forecast hour of it;
+- the precipitation, temperature or wind forecast instead (`layer`), with animated wind streams, a key and the reading at the place;
+- hazard events nearby as markers the reader can tap and ask about;
+- the risk by day for the week.
+
+The reader can pan, zoom, open the map full screen, play the week hour by hour and switch between the four fields; the map tells the assistant what the reader is looking at. Clients that do not display apps get the same answer as text, with a link to the place on Criora's own map.
 
 ## Resources
 
@@ -84,6 +96,7 @@ Place tools take latitude and longitude, or a place name that they resolve to th
 - "Are there any wildfires or earthquakes near Tokyo right now?"
 - "Compare climate risk for Spain and Portugal."
 - "I'm going to Seville from 3 to 6 October — how risky is that trip?"
+- "Show me the wind forecast on a map around Brest."
 
 ## Data sources
 
