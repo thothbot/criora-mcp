@@ -67,11 +67,11 @@ Place tools take latitude and longitude, or a place name that they resolve to th
 `show_risk_map` is an [MCP App](https://modelcontextprotocol.io/docs/extensions/apps): in clients that display apps (Claude on the web, desktop and mobile, and other MCP Apps hosts) it draws a map under the answer, on NASA Blue Marble imagery:
 
 - this week's worst forecast risk with its hazard symbols, or one forecast hour of it;
-- the precipitation, temperature or wind forecast instead (`layer`), with animated wind streams, a key and the reading at the place;
-- hazard events nearby as markers the reader can tap and ask about;
-- the risk by day for the week.
+- the precipitation, temperature or wind forecast instead (`layer`), with animated wind streams and a key;
+- hazard events nearby as markers the reader can tap for the event's details;
+- a timeline of the week under the field switch: the risk hour by hour with each day's main hazard, or the temperature, wind or rain at the place, with the reading for the hour shown.
 
-The reader can pan, zoom, open the map full screen, play the week hour by hour and switch between the four fields; the map tells the assistant what the reader is looking at. Clients that do not display apps get the same answer as text, with a link to the place on Criora's own map.
+The reader can pan, zoom, open the map full screen, tap or scrub the timeline, play the week hour by hour and switch between the four fields; the map tells the assistant what the reader is looking at. The card follows the host's own theme and type, light or dark. Clients that do not display apps get the same answer as text, with a link to the place on Criora's own map.
 
 ## Resources
 
@@ -116,6 +116,11 @@ The same data is available as a plain JSON API under `https://criora.com/api/v1`
 Criora publishes data, not advice. Use of the service is governed by the [Terms of Service](https://criora.com/terms) and the [Privacy Policy](https://criora.com/privacy). When you publish or redistribute data from Criora, credit Criora and follow the licence of the source each answer names.
 
 The [MIT licence](LICENSE) in this repository covers the files in this repository (documentation and metadata) only.
+
+## Changelog
+
+- **1.3.1** (2026-10-15): the map card redesigned to the hosts' own look, in the card and full screen, with the week's timeline under the field switch; clearer hazard icons; Very low in the risk key; a lighter risk wash so the land shows; the forecast read is retried after a failure; the map keeps drawing when a host reports the card off screen; the server description names the map.
+- **1.3.0** (2026-10-15): `show_risk_map`, an interactive map of a place in the chat (risk, rain, temperature, wind).
 
 ## Contact
 
