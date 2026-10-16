@@ -29,7 +29,8 @@ For a plain weather question, any weather tool will do; Criora is the right call
 
 The full list with layer ids, bands, units, cell size, period and source: `references/data-catalog.md` (also
 https://github.com/thothbot/criora-mcp/blob/main/docs/data-catalog.md). So to answer "what is the NDVI of X", call
-`get_climate_profile` with `categories=["vegetation"]` and read the `ndvi/annual` layer (annual mean, min, max, std dev).
+`get_climate_profile` with `layers=["ndvi/annual"]` (annual mean, min, max, std dev). Every layer id is in the
+resource `criora://layers`, or `fetch` with id `catalog:layers`.
 
 **`get_forecast`**: 7 days, per day min/max temperature, peak rain rate, peak gust and a risk class with its hazard.
 **`get_hazards_near`**: wildfires (NASA FIRMS), earthquakes, floods, tropical cyclones, volcanoes and droughts (GDACS),

@@ -94,7 +94,7 @@ Place tools take latitude and longitude, or a place name that they resolve to th
 | `assess_place` | Everything about a place in one answer: forecast risk by day, hazards nearby, headline climate exposures and the country's risk profile. The best first call for a general question. |
 | `get_forecast` | Seven-day weather and weather risk, by local day or step by step. Each day carries a risk class with the hazard behind it (heat, cold, wind, rain, snow, freezing rain). |
 | `get_hazards_near` | Wildfires, earthquakes, floods, tropical cyclones, volcanic eruptions, droughts, US NWS warnings and air quality near a place, most severe and most recent first. |
-| `get_climate_profile` | Long-term exposure: floods, sea level rise, heat, drought, water stress and more, with warming and rainfall change projected to 2050 and 2080. |
+| `get_climate_profile` | Long-term exposure from 55 layers: flood depth, sea level rise, heat, drought, water stress, wind, NDVI and other satellite layers, terrain, land cover, with warming and rainfall change projected to 2050 and 2080. Narrow it with `categories` or `layers` (ids in `criora://layers`). |
 | `get_country_profile` | A country's overall risk score and its climate, nature, social, governance and adaptation scores; on request about 160 indicators with world and regional benchmarks. |
 | `compare_countries` | Two to ten countries side by side on overall risk and each dimension, with their ranks. |
 | `rank_countries` | The countries most or least at risk, overall or on one dimension, optionally within a region, subregion or income group, each with its score, risk class and rank. |
@@ -121,6 +121,8 @@ The reader can pan, zoom, open the map full screen, tap or scrub the timeline, p
 | `criora://country/{iso3}` | A country's risk scores and classes as JSON (template; ISO3 codes autocomplete). |
 | `criora://methodology` | How Criora scores country risk (markdown). |
 | `criora://sources` | The datasets behind every answer, with licences (markdown). |
+| `criora://layers` | Every long-term climate layer `get_climate_profile` reads, with its id, unit, years and source (markdown). |
+| `criora://indicators` | The country indicators by risk dimension and source (markdown). |
 
 ## Prompts
 
@@ -129,6 +131,8 @@ The reader can pan, zoom, open the map full screen, tap or scrub the timeline, p
 | `assess_trip` | `destination`, `dates` (optional) | How risky a trip is: weather risk on the travel days, hazards nearby, seasonal exposure. |
 | `compare_places_to_live` | `places` (semicolon-separated) | Long-term climate exposure and country risk of several places side by side. |
 | `country_briefing` | `country` (name or ISO3, autocompleted) | One country's climate and disaster risk against its region and the world. |
+| `site_due_diligence` | `site`, `purpose` (optional) | Climate and disaster risk of a property or site: flooding, heat, drought, wildfire, subsidence, hazards nearby. |
+| `esg_country_screen` | `countries` or `region` (optional) | Screen countries on climate and disaster risk for ESG, investment or supply-chain decisions. |
 
 ## Example questions
 
@@ -163,6 +167,7 @@ The [MIT licence](LICENSE) in this repository covers the files in this repositor
 
 ## Changelog
 
+- **1.4.0** (2026-10-16): the tools say what data they hold: `get_climate_profile` takes `layers` by id (55 layers, e.g. `ndvi/annual`) and its `categories` argument lists each category's layers; resources `criora://layers` and `criora://indicators`; `search`/`fetch` find the data catalogue (`catalog:layers`, `catalog:indicators`); descriptions and titles rewritten to the directories' rules; prompts `site_due_diligence` and `esg_country_screen`.
 - **1.3.1** (2026-10-15): the map card redesigned to the hosts' own look, in the card and full screen, with the week's timeline under the field switch; clearer hazard icons; Very low in the risk key; a lighter risk wash so the land shows; the forecast read is retried after a failure; the map keeps drawing when a host reports the card off screen; the server description names the map.
 - **1.3.0** (2026-10-15): `show_risk_map`, an interactive map of a place in the chat (risk, rain, temperature, wind).
 

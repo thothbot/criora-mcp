@@ -1,7 +1,7 @@
 {
   "identifier": "thothbot-criora-mcp",
   "name": "Criora climate risk",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "author": "Criora",
   "authorUrl": "https://criora.com",
   "category": "weather",
@@ -26,7 +26,7 @@
   "tools": [
     {
       "name": "show_risk_map",
-      "title": "Map of the risk around a place",
+      "title": "Interactive climate risk and weather map",
       "description": "Shows an interactive map of a place in clients that render apps, such as Claude and ChatGPT: this week's forecast risk over the area, hazard events nearby as markers, and the risk by day, which the reader can pan, zoom and open full screen. Instead of the risk, the map can lay the precipitation, temperature or wind forecast under the events (`layer`), hour by hour over the week, and the reader can switch between all four. A client without apps gets the same summary as text, with a link to the place on Criora's own map.\n\nUse it when the user wants to see the place, the week's risk or the hazards around it on a map, or when a map makes an answer clearer than a list. The figures come from the same sources as get_forecast and get_hazards_near, which give them in full.\n\nGive latitude and longitude, or place, which costs a lookup in the shared geocoder. With both, the coordinates are used and place only names the map, at no lookup: pass the name the user knows the place by, or the map is titled by its coordinates and country.",
       "inputSchema": {
         "properties": {
@@ -105,7 +105,7 @@
         "idempotentHint": true,
         "openWorldHint": true,
         "readOnlyHint": true,
-        "title": "Map of the risk around a place"
+        "title": "Interactive climate risk and weather map"
       }
     },
     {
@@ -144,8 +144,8 @@
     },
     {
       "name": "get_forecast",
-      "title": "Seven-day forecast and weather risk",
-      "description": "This week's forecast at a place by local day: minimum and maximum temperature, peak precipitation rate, peak wind, and the day's forecast risk class with the hazard behind it (heat, cold, wind, rain, snow, freezing rain) and its physical reading (UTCI felt temperature, gust speed or rain rate).\n\nUse it for the weather or the weather risk in the next seven days: it answers that at a third of the size of assess_place, with every step on request. For events already happening (fires, floods, earthquakes) use get_hazards_near; for what a place is exposed to over years, get_climate_profile.\n\nGive latitude and longitude, or place, which costs a lookup in the shared geocoder; with both, the coordinates are used. hourly=true adds every forecast step to the daily summary.\n\nSteps are hourly for the first day, then 3-hourly, then 6-hourly to day seven, and each day gives its step_hours: from the fourth day the minimum and maximum are of 6-hourly steps, so the true peak can fall between two of them. A day marked partial is cut by the start or end of the window. Source: Environment and Climate Change Canada GDPS global model, read at its own 15 km cell containing the point.",
+      "title": "7-day weather forecast and extreme-weather risk",
+      "description": "This week's weather and extreme-weather risk at a place: heat waves and cold (graded on the UTCI felt temperature), storms and wind gusts, heavy rain, snow and freezing rain, by local day, with each day's risk class from Very low to Critical and the hazard behind it.\n\nUse it for the weather or the weather risk in the next seven days. For disasters already happening use get_hazards_near; for what a place is exposed to over years, get_climate_profile.\n\nReturns for each day the minimum and maximum temperature, peak precipitation rate, peak wind gust and the risk with its physical reading; hourly=true adds every forecast step. Steps are hourly on the first day, then 3-hourly, then 6-hourly from the fourth day, so a day's true peak can fall between two steps; a day marked partial is cut by the forecast window. Source: Environment and Climate Change Canada GDPS model, read at its 15 km cell. Give latitude and longitude, or a place name.",
       "inputSchema": {
         "properties": {
           "latitude": {
@@ -206,13 +206,13 @@
         "idempotentHint": true,
         "openWorldHint": true,
         "readOnlyHint": true,
-        "title": "Seven-day forecast and weather risk"
+        "title": "7-day weather forecast and extreme-weather risk"
       }
     },
     {
       "name": "get_climate_profile",
-      "title": "Long-term climate profile",
-      "description": "Long-term climate exposure at a place: every climate layer on the Criora map, read at the point.\n\nERA5 extremes of the latest full year, CMIP6 warming and rainfall change to 2050 and 2080, flood depth by scenario, sea level rise, water stress, drought, aridity, burned area, land cover, elevation, subsidence and the Köppen zone. Each layer gives its year, unit, cell size and readings by band, and names its source, whose institution, licence and link are given once in sources.\n\nUse it for what a place is exposed to over years, and once per place to compare places. It has every layer where assess_place has the headline ones, and is larger for it, so pass categories when the question is about one kind of exposure. For this week's weather use get_forecast; for events happening now, get_hazards_near.\n\nGive latitude and longitude, or place, which costs a lookup in the shared geocoder. With both, the coordinates are used and place only names the map, at no lookup: pass the name the user knows the place by, or the map is titled by its coordinates and country.",
+      "title": "Long-term climate risk: floods, heat, drought, sea level",
+      "description": "Long-term climate risk and environmental data of a place or property, read at the point from 55 global layers: river and coastal flood depth of a 100-year flood now and in 2050 and 2080, sea level rise, extreme heat and cold days, heavy rain, drought (SPI-12, aridity, WRI drought risk), water stress, wind and storm days, warming and rainfall change to 2050 and 2080 (CMIP6), NDVI vegetation index and leaf area, wildfire burned area, soil moisture, snow, surface water, elevation, slope, land subsidence, land cover, built-up share and the Köppen climate zone.\n\nUse it for what a place is exposed to over years, and once per place to compare places; assess_place has only the headline layers. For this week's weather use get_forecast; for events happening now, get_hazards_near.\n\nNarrow it with categories, or with layers by id: the resource criora://layers, or fetch catalog:layers, lists every layer with its unit, years and source. Returns each layer's readings by band with its unit, year, cell size and source (ERA5, CMIP6, WRI Aqueduct, IPCC AR6, MODIS, JRC, Copernicus DEM and others). Give latitude and longitude, or a place name.",
       "inputSchema": {
         "properties": {
           "latitude": {
@@ -282,8 +282,81 @@
               }
             ],
             "default": null,
-            "description": "Only the layers of these categories, e.g. flooding for flood depth and sea level rise, temperature for heat; every layer when omitted",
+            "description": "Only the layers of these categories; every layer when omitted. temperature: hottest day of the year, coldest night of the year, hot days over 35 °C, summer days, tropical nights, frost nights, ice days, mean temperature with the coldest and warmest month, UTCI felt temperature (heat and cold stress), warming to 2050 and 2080 (CMIP6), change in the warmest month's maximum to 2050 and 2080, change in the coldest month's minimum to 2050 and 2080; precipitation: heavy-rain days (10 to 100 mm) and the wettest day, precipitation with the driest and wettest month, daily rain of the wettest month, change in annual rainfall to 2050 and 2080, change in the wettest quarter's rainfall, change in the driest quarter's rainfall, drought risk (WRI Aqueduct), SPI-12 drought index, aridity index, snow cover, snow water equivalent, snowmelt, snow albedo; wind: strongest wind gust of the year, gale, storm and hurricane-force gust days, mean wind speed, CAPE, the energy of thunderstorms; water: baseline water stress (WRI Aqueduct), water stress in 2050 and 2080 (WRI Aqueduct), soil moisture, relative humidity, vapour pressure deficit, potential evaporation, surface water occurrence from 38 years of Landsat (JRC), share of lakes, rivers and wetlands, lake or wetland type, distance to the coast; flooding: river flood depth of a 100-year flood, now and in 2050 and 2080 (WRI Aqueduct), coastal flood depth of a 100-year flood, now and in 2050 and 2080 (WRI Aqueduct), GloFAS 30-day flood forecast, sea level rise to 2050 and 2100 (IPCC AR6); vegetation: NDVI vegetation index, annual mean, minimum and maximum (MODIS satellite), leaf area index of trees and shrubs, leaf area index of grass and crops, area burned by wildfire last year (GFED, satellite), area burned by wildfire each year since 2002 (GFED, satellite); terrain: elevation (Copernicus DEM), slope, terrain ruggedness, probability of land subsidence over 1 cm a year, land subsidence rate class; landcover: land cover class (MODIS satellite), built-up share of the land (JRC GHSL, Sentinel-2 and Landsat); misc: Köppen climate zone, now and in 2050 and 2080, solar radiation, solar radiation of the sunniest month, surface runoff",
             "title": "Categories"
+          },
+          "layers": {
+            "anyOf": [
+              {
+                "items": {
+                  "enum": [
+                    "era5_extremum/temperature_max",
+                    "era5_extremum/temperature_min",
+                    "era5_extremum/climate_days",
+                    "era5_monthly/temperature",
+                    "era5_monthly/utci",
+                    "cmip6_climate_delta/tmean",
+                    "cmip6_climate_delta/tmax_warm",
+                    "cmip6_climate_delta/tmin_cold",
+                    "era5_extremum/extreme_precip",
+                    "era5_monthly/precipitation",
+                    "era5_monthly/precipitation_max",
+                    "cmip6_climate_delta/precip_annual",
+                    "cmip6_climate_delta/precip_wet",
+                    "cmip6_climate_delta/precip_dry",
+                    "aqueduct_water_stress/drr",
+                    "spi_12/observed",
+                    "aridity_index/annual",
+                    "era5_monthly/snow_cover",
+                    "era5_monthly/snow_water_equivalent",
+                    "era5_monthly/snowmelt",
+                    "era5_monthly/snow_albedo",
+                    "era5_extremum/wind_max",
+                    "era5_extremum/storm_days",
+                    "era5_monthly/wind",
+                    "era5_monthly/cape",
+                    "aqueduct_water_stress/bws",
+                    "aqueduct_water_future/ws",
+                    "era5_monthly/soil_moisture",
+                    "era5_monthly/humidity",
+                    "era5_monthly/vpd",
+                    "era5_monthly/potential_evapotranspiration",
+                    "jrc_surface_water/occurrence",
+                    "glwd/coverage",
+                    "glwd/classification",
+                    "distance_to_coast/distance",
+                    "flood_riverine/inundation",
+                    "flood_coastal/inundation",
+                    "flood_forecast/glofas",
+                    "slr_projections/projections",
+                    "ndvi/annual",
+                    "era5_monthly/lai_high",
+                    "era5_monthly/lai_low",
+                    "burned_area/annual",
+                    "burned_area/climatology_22yr",
+                    "dem/elevation",
+                    "dem/slope",
+                    "dem/tri",
+                    "subsidence/probability",
+                    "subsidence/prediction",
+                    "modis_land_cover/igbp",
+                    "ghsl_built_up/built_up",
+                    "koppen/climate",
+                    "era5_monthly/solar_radiation",
+                    "era5_monthly/solar_radiation_max",
+                    "era5_monthly/runoff"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only these layers, by id, e.g. ndvi/annual for the NDVI vegetation index or flood_riverine/inundation for river flood depth; every id with what it measures is in the resource criora://layers. Combined with categories, both are given",
+            "title": "Layers"
           }
         },
         "type": "object",
@@ -294,13 +367,13 @@
         "idempotentHint": true,
         "openWorldHint": true,
         "readOnlyHint": true,
-        "title": "Long-term climate profile"
+        "title": "Long-term climate risk: floods, heat, drought, sea level"
       }
     },
     {
       "name": "get_hazards_near",
-      "title": "Hazard events near a place",
-      "description": "Disasters and hazards happening now or recently near a place, most severe and most recent first, each with its distance, bearing, severity and time.\n\nWildfires (NASA FIRMS), earthquakes, floods, tropical cyclones, volcanic eruptions and droughts (GDACS), US National Weather Service flood, tropical cyclone and fire warnings, and air quality (OpenAQ reference monitors).\n\nUse it for what is happening there now: it answers that at a fraction of the size of assess_place, and the radius, event types and period can be chosen. For the weather forecast use get_forecast; for long-term exposure, get_climate_profile.\n\nGive latitude and longitude, or place, which costs a lookup in the shared geocoder; with both, the coordinates are used. Without radius_km every event type is searched at the largest distance, which radius_used_km reports. The most severe and most recent events are listed, and total and counts_by_type cover every event found.",
+      "title": "Natural disasters happening near a place",
+      "description": "Natural disasters and hazards happening now or recently near a place: wildfires (NASA FIRMS satellite fire detections), earthquakes, floods, tropical cyclones (hurricanes and typhoons), volcanic eruptions and droughts (GDACS), US National Weather Service flood, tropical cyclone and fire warnings, and air quality (OpenAQ reference monitors).\n\nUse it for what is happening there now. For the weather forecast use get_forecast; for long-term exposure, get_climate_profile.\n\nReturns the most severe and most recent events first, each with its type, severity (low to critical), distance, bearing and time, and total and counts_by_type cover every event found. radius_km (1 to 500), event_types and days (1 to 30) narrow the search; without radius_km every type is searched at its largest distance, which radius_used_km reports. Give latitude and longitude, or a place name.",
       "inputSchema": {
         "properties": {
           "latitude": {
@@ -410,13 +483,13 @@
         "idempotentHint": true,
         "openWorldHint": true,
         "readOnlyHint": true,
-        "title": "Hazard events near a place"
+        "title": "Natural disasters happening near a place"
       }
     },
     {
       "name": "get_country_profile",
       "title": "Country climate and disaster risk profile",
-      "description": "A country's climate and disaster risk from the Criora Atlas: overall risk score, class and rank among all countries, the climate, nature, social, governance and adaptation scores and classes, and its income group and region.\n\nUse it for one country in depth. For several named countries side by side use compare_countries; to find which countries are most or least at risk, rank_countries; for a place inside a country, the place tools.\n\nThe country is an ISO 3166-1 alpha-3 code or its English name; an unknown one is refused with the expected form. Scores run 0 to 100; higher means more risk.\n\ninclude_indicators=true adds, per dimension, the indicators where the country is furthest from the world median, first (INFORM Risk Index, ND-GAIN, World Bank), each with its value, year, source and the medians of the world and of the country's own region, subregion and income group, the ones meta names. indicators_limit sets how many are listed per dimension, and total counts each dimension's indicators.",
+      "description": "Climate and disaster risk of one country, of 194, for ESG, investment, insurance and humanitarian screening: the overall risk score (0 to 100, higher is riskier), class and world rank, and the climate, nature, social, governance and adaptation scores and classes, with its region and income group.\n\nUse it for one country in depth. For named countries side by side use compare_countries; for the countries most or least at risk, rank_countries; for a place inside a country, assess_place.\n\ninclude_indicators=true adds the indicators behind each dimension from the INFORM Risk Index, ND-GAIN and the World Bank (flood, earthquake and drought risk, water stress, food security, health, governance and about 150 more), those furthest from the world median first, each with its value, year, source and the medians of the world, region, subregion and income group; indicators_limit caps them per dimension, and criora://indicators lists them all. The country is an ISO 3166-1 alpha-3 code or its English name; an unknown one is refused with the expected form.",
       "inputSchema": {
         "properties": {
           "country": {
@@ -455,8 +528,8 @@
     },
     {
       "name": "compare_countries",
-      "title": "Compare countries",
-      "description": "Two to ten named countries side by side: each one's overall risk score and class, its climate, nature, social, governance and adaptation scores, and its rank by overall risk.\n\nUse it when the countries are known in advance. To find the countries most or least at risk, optionally within a region or income group, use rank_countries; for one country's underlying indicators, get_country_profile.\n\nCountries are ISO 3166-1 alpha-3 codes or English names; an unknown one is refused with the expected form. Scores run 0 to 100; higher means more risk. Ranks are among all countries in the Criora Atlas, 1 being the highest risk.",
+      "title": "Compare countries' climate and disaster risk",
+      "description": "Climate and disaster risk of two to ten named countries side by side: each one's overall risk score and class, its climate, nature, social, governance and adaptation scores, and its world rank by overall risk.\n\nUse it when the countries are known in advance. To find the countries most or least at risk use rank_countries; for one country's indicators, get_country_profile.\n\nCountries are ISO 3166-1 alpha-3 codes or English names; an unknown one is refused with the expected form. Scores run 0 to 100, higher is riskier, and rank 1 is the highest risk among 194 countries. Sources: INFORM Risk Index, ND-GAIN and the World Bank.",
       "inputSchema": {
         "properties": {
           "countries": {
@@ -481,13 +554,13 @@
         "idempotentHint": true,
         "openWorldHint": false,
         "readOnlyHint": true,
-        "title": "Compare countries"
+        "title": "Compare countries' climate and disaster risk"
       }
     },
     {
       "name": "rank_countries",
-      "title": "Rank countries by risk",
-      "description": "The countries most or least at risk, overall or on one risk dimension, each with its score, risk class and rank, optionally only those in a region, subregion or income group.\n\nAnswers \"which countries are most exposed to climate risk\", \"the riskiest countries in Southern Asia\" or \"low-income countries with the lowest adaptation score\". For countries named in advance use compare_countries; for one country in depth, get_country_profile.\n\nRegions, subregions and income groups are named as the countries' meta names them; a name no country has is refused with the names there are. The filters combine, and a combination that matches nothing returns an empty list; limit cuts the list, while matched counts every country that passed the filters. Scores run 0 to 100; higher means more risk. Each country's rank is among all countries in the Criora Atlas, 1 being the highest risk: a filter narrows the list but not the rank. Countries without a score on the dimension are not ranked and are counted in no_score.",
+      "title": "Rank countries by climate and disaster risk",
+      "description": "The countries most or least at climate and disaster risk, overall or on one dimension (climate, nature, social, governance, adaptation), each with its score, risk class and rank, optionally only those in a region, subregion or income group.\n\nAnswers \"which countries are most exposed to climate risk\", \"the riskiest countries in Southern Asia\" or \"low-income countries with the lowest adaptation score\". For countries named in advance use compare_countries; for one country in depth, get_country_profile.\n\nRegions, subregions and income groups are named as the countries' meta names them; a name no country has is refused with the names there are. The filters combine, and a combination that matches nothing returns an empty list; limit cuts the list, while matched counts every country that passed the filters. Scores run 0 to 100, higher is riskier. A country's rank is among all 194 countries, 1 being the highest risk: a filter narrows the list but not the rank. Countries without a score on the dimension are counted in no_score.",
       "inputSchema": {
         "properties": {
           "dimension": {
@@ -569,13 +642,13 @@
         "idempotentHint": true,
         "openWorldHint": false,
         "readOnlyHint": true,
-        "title": "Rank countries by risk"
+        "title": "Rank countries by climate and disaster risk"
       }
     },
     {
       "name": "assess_place",
-      "title": "Risk overview of a place",
-      "description": "One answer for an open question about one place (\"is it safe there\", \"what are the risks\"): this week's forecast risk by day, hazard events nearby, the headline climate exposures (heat, flood, sea-level rise, water stress, drought, heavy rain, fire, climate zone) and the risk profile of the country it lies in.\n\nFor a specific question, call the single tool instead, which answers it in full: this week's weather, get_forecast; events happening now, get_hazards_near; long-term exposure, get_climate_profile, which has every climate layer where this has the headline ones; the country, get_country_profile. It answers for one place: places are compared on get_climate_profile, one call each, layer by layer, and countries on compare_countries or rank_countries.\n\nGive latitude and longitude, or place, which costs a lookup in the shared geocoder. With both, the coordinates are used and place only names the map, at no lookup: pass the name the user knows the place by, or the map is titled by its coordinates and country.",
+      "title": "Climate and disaster risk of a place",
+      "description": "Climate and disaster risk overview of one place or property in a single answer: this week's forecast risk by day, natural hazards happening nearby, the headline long-term exposures (heat, river and coastal flooding, sea level rise, water stress, drought, heavy rain, wildfire, climate zone) and the risk profile of the country it lies in.\n\nUse it first for an open question about one place (\"is it safe there\", \"what are the risks\", \"should I worry about floods or heat\"). For one specific question call the matching tool, which answers it in full: get_forecast, get_hazards_near, get_climate_profile or get_country_profile. To compare places, call get_climate_profile once per place.\n\nGive latitude and longitude, or a place name, which is resolved to its best match and reported back. Returns the forecast days, the hazard events, the headline climate layers with their sources, the country summary and criora_url, the place on the Criora map.",
       "inputSchema": {
         "properties": {
           "latitude": {
@@ -630,17 +703,17 @@
         "idempotentHint": true,
         "openWorldHint": true,
         "readOnlyHint": true,
-        "title": "Risk overview of a place"
+        "title": "Climate and disaster risk of a place"
       }
     },
     {
       "name": "search",
       "title": "Search Criora",
-      "description": "Criora documents matching a query, each with the id fetch reads and the Criora page to cite: countries, places, and the pages on Criora's methodology and data sources.\n\nUse it to find what Criora has on a subject before reading it with fetch. For an answer in one call, the specific tools are shorter: assess_place for a place, get_country_profile for a country, rank_countries for the countries most at risk.\n\nA country is found by its ISO 3166-1 alpha-3 or alpha-2 code or its English name as the whole query, or by its name anywhere in it. The words methodology or sources find those pages. Only when nothing else matches is the query looked up as a place name, once, in the geocoder every user shares, which answers one lookup a second; a place is found best by its name alone. Nothing found is an empty list.",
+      "description": "Find Criora's documents on a subject, to read and cite with fetch: a country's climate and disaster risk profile, a place's risk report, the pages on Criora's methodology and data sources, and the data catalogue (every climate layer with satellite data such as NDVI, and the country indicators). Each result has the id fetch reads and the Criora page to cite.\n\nUse it to find what Criora has before reading it with fetch. For an answer in one call the specific tools are shorter: assess_place for a place, get_country_profile for a country, rank_countries for the countries most at risk.\n\nA country is found by its ISO 3166-1 alpha-3 or alpha-2 code or its English name. The words methodology or sources find those pages; layers, catalogue, satellite, NDVI or indicators find the data catalogue. Only when nothing else matches is the query looked up as a place name, in the geocoder every user shares; a place is found best by its name alone. Nothing found is an empty list.",
       "inputSchema": {
         "properties": {
           "query": {
-            "description": "A country, a place name, or a subject such as methodology or data sources",
+            "description": "A country, a place name, or a subject: methodology, data sources, or the data catalogue (layers, NDVI, satellite, indicators)",
             "title": "Query",
             "type": "string"
           }
@@ -662,11 +735,11 @@
     {
       "name": "fetch",
       "title": "Read a Criora document",
-      "description": "One Criora document as markdown, with its title, the Criora page to cite and the sources it draws on, by an id search returned.\n\ncountry:<ISO3> (country:BGD) gives the country's overall risk score, class and rank, each dimension with its class, its most notable indicators against the world and regional medians, and the sources with their dates. place:<latitude>,<longitude> (place:23.8103,90.4125) gives this week's forecast risk by day, the five most notable hazard events nearby, the headline climate exposures and the country. page:methodology and page:sources are those pages of the site.\n\nUse it to read a document for research and cite it. The specific tools answer with every figure as data: get_country_profile, assess_place and the rest. An id of another form is refused with the forms it takes. A long text is cut at a paragraph, with the page that has the rest.",
+      "description": "One Criora document as markdown, with its title, the Criora page to cite and the sources it draws on, by an id search returned.\n\ncountry:<ISO3> (country:BGD) gives the country's risk score, class and rank, each dimension with its class, and its most notable indicators against the world and regional medians. place:<latitude>,<longitude> (place:23.8103,90.4125) gives this week's forecast risk by day, the most notable hazard events nearby, the headline climate exposures and the country. page:methodology and page:sources are those pages of the site; catalog:layers lists every climate layer and catalog:indicators every country indicator.\n\nUse it to read a document for research and cite it. The specific tools answer with every figure as data: get_country_profile, assess_place and the rest. An id of another form is refused with the forms it takes. A long text is cut at a paragraph, with the page that has the rest.",
       "inputSchema": {
         "properties": {
           "id": {
-            "description": "An id search returned: country:<ISO3>, place:<latitude>,<longitude> or page:<name>",
+            "description": "An id search returned: country:<ISO3>, place:<latitude>,<longitude>, page:<name> or catalog:layers / catalog:indicators",
             "title": "Id",
             "type": "string"
           }
@@ -688,20 +761,37 @@
   ],
   "resources": [
     {
+      "uri": "criora://layers",
+      "name": "layers",
+      "title": "Climate layers get_climate_profile reads",
+      "description": "Every long-term layer get_climate_profile reads at a point, as markdown: its id, what it measures (heat, rain, drought, wind, water stress, flood depth, sea level rise, NDVI and other satellite layers, terrain, land cover), bands, units, years and source. Read it to find the id for the layers argument.",
+      "mimeType": "text/markdown"
+    },
+    {
+      "uri": "criora://indicators",
+      "name": "indicators",
+      "title": "Country risk indicators",
+      "description": "The country indicators behind the five risk dimensions (climate, nature, social, governance, adaptation), by dimension and source (INFORM Risk Index, ND-GAIN, World Bank), as markdown.",
+      "mimeType": "text/markdown"
+    },
+    {
       "uri": "criora://methodology",
       "name": "methodology",
+      "title": "Criora Atlas methodology: how country risk is scored",
       "description": "Criora Atlas methodology: how country risk is scored, as markdown, as the site renders it at https://criora.com/atlas/methodology",
       "mimeType": "text/markdown"
     },
     {
       "uri": "criora://sources",
       "name": "sources",
+      "title": "Criora data sources: every dataset behind the scores and the map",
       "description": "Criora data sources: every dataset behind the scores and the map, as markdown, as the site renders it at https://criora.com/docs/references/data-sources",
       "mimeType": "text/markdown"
     },
     {
       "uriTemplate": "criora://country/{iso3}",
       "name": "country",
+      "title": "Country climate and disaster risk",
       "description": "A country's risk profile from the Criora Atlas, as get_country_profile answers it without indicators: overall score, class and rank, the dimension scores and classes, region and income group. iso3 is an ISO 3166-1 alpha-3 code such as BGD.",
       "mimeType": "application/json"
     }
@@ -745,6 +835,40 @@
           "description": "Country name or ISO 3166-1 alpha-3 code",
           "name": "country",
           "required": true
+        }
+      ]
+    },
+    {
+      "name": "site_due_diligence",
+      "title": "Site due diligence",
+      "description": "Climate and disaster risk of a property or site for due diligence: flooding, heat, drought, wildfire, subsidence and the hazards nearby, now and in 2050 and 2080.",
+      "arguments": [
+        {
+          "description": "An address, a place name, or latitude and longitude",
+          "name": "site",
+          "required": true
+        },
+        {
+          "description": "What the site is for, e.g. buying a house, a warehouse, a solar farm",
+          "name": "purpose",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "esg_country_screen",
+      "title": "Screen countries for ESG risk",
+      "description": "Screen countries on climate and disaster risk for ESG, investment or supply-chain decisions.",
+      "arguments": [
+        {
+          "description": "Countries to screen, separated by semicolons; omit to rank all",
+          "name": "countries",
+          "required": false
+        },
+        {
+          "description": "Or a region or subregion, e.g. Southern Asia",
+          "name": "region",
+          "required": false
         }
       ]
     }
