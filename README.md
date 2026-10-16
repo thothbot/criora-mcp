@@ -12,6 +12,14 @@ Criora is a hosted, remote [Model Context Protocol](https://modelcontextprotocol
 
 This repository holds the documentation and registry metadata for the hosted server. The server itself runs at criora.com; there is nothing to install.
 
+## Use cases
+
+- **Travel safety:** "is it safe to travel to Dubai next week?": heat, storms and heavy rain on the travel days, and disasters happening nearby.
+- **Property, real estate and site due diligence:** flood risk (river and coastal flood depth by scenario), sea level rise, extreme heat, drought, water stress, wildfire and subsidence at an address or coordinates, with warming to 2050 and 2080.
+- **Relocation:** compare the long-term climate exposure of several cities side by side.
+- **ESG, insurance and investment research:** country climate and disaster risk for 194 countries (INFORM Risk Index, ND-GAIN, World Bank), rankings within a region or income group, ~160 indicators against regional and world benchmarks.
+- **Disaster monitoring:** wildfires, earthquakes, floods, hurricanes and typhoons, volcanoes, droughts and air quality near any place right now.
+
 ## Connect
 
 **Claude (claude.ai, Claude Desktop):** Settings → Connectors → Add custom connector, then paste `https://criora.com/mcp`.
@@ -20,6 +28,13 @@ This repository holds the documentation and registry metadata for the hosted ser
 
 ```bash
 claude mcp add --transport http criora https://criora.com/mcp
+```
+
+or as a Claude Code plugin (MCP server plus a skill that tells Claude when to use which tool):
+
+```bash
+/plugin marketplace add thothbot/criora-mcp
+/plugin install criora@criora
 ```
 
 **Cursor** (`~/.cursor/mcp.json`) and other clients that use an `mcpServers` file:
@@ -119,6 +134,9 @@ The reader can pan, zoom, open the map full screen, tap or scrub the timeline, p
 - "Compare climate risk for Spain and Portugal."
 - "I'm going to Seville from 3 to 6 October — how risky is that trip?"
 - "Show me the wind forecast on a map around Brest."
+- "What is the flood risk and sea level rise exposure for a house in Rotterdam by 2050?"
+- "Is there a heat wave or a hurricane coming to Miami this week?"
+- "Which low-income countries are most exposed to climate risk, for an ESG screen?"
 
 ## Data sources
 
