@@ -1,0 +1,752 @@
+{
+  "identifier": "thothbot-criora-mcp",
+  "name": "Criora climate risk",
+  "version": "1.3.1",
+  "author": "Criora",
+  "authorUrl": "https://criora.com",
+  "category": "weather",
+  "cloudEndpoint": "https://criora.com/mcp",
+  "homepage": "https://github.com/thothbot/criora-mcp",
+  "icon": "https://criora.com/icon-512x512.png",
+  "description": "Climate and disaster risk for any place or property: floods, heat waves, storms and hurricanes, wildfires, earthquakes, sea level rise, 7-day weather risk and country risk for 194 countries, with an interactive map. Free, no API key.",
+  "tags": [
+    "climate-risk",
+    "disaster-risk",
+    "flood-risk",
+    "heat-wave",
+    "hurricane",
+    "wildfire",
+    "earthquake",
+    "sea-level-rise",
+    "weather",
+    "country-risk",
+    "esg",
+    "travel-safety"
+  ],
+  "tools": [
+    {
+      "name": "show_risk_map",
+      "title": "Map of the risk around a place",
+      "description": "Shows an interactive map of a place in clients that render apps, such as Claude and ChatGPT: this week's forecast risk over the area, hazard events nearby as markers, and the risk by day, which the reader can pan, zoom and open full screen. Instead of the risk, the map can lay the precipitation, temperature or wind forecast under the events (`layer`), hour by hour over the week, and the reader can switch between all four. A client without apps gets the same summary as text, with a link to the place on Criora's own map.\n\nUse it when the user wants to see the place, the week's risk or the hazards around it on a map, or when a map makes an answer clearer than a list. The figures come from the same sources as get_forecast and get_hazards_near, which give them in full.\n\nGive latitude and longitude, or place, which costs a lookup in the shared geocoder. With both, the coordinates are used and place only names the map, at no lookup: pass the name the user knows the place by, or the map is titled by its coordinates and country.",
+      "inputSchema": {
+        "properties": {
+          "latitude": {
+            "anyOf": [
+              {
+                "maximum": 90,
+                "minimum": -90,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Latitude of the place asked about, in degrees, WGS84. Give it with longitude, or give place instead",
+            "title": "Latitude"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "maximum": 180,
+                "minimum": -180,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Longitude of the place asked about, in degrees, WGS84. Give it with latitude, or give place instead",
+            "title": "Longitude"
+          },
+          "place": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "A place name or address, used only when latitude and longitude are not given. It is resolved to its best match by a geocoder shared by every user and limited to one lookup a second, so pass coordinates when you have them",
+            "title": "Place"
+          },
+          "focus": {
+            "default": "both",
+            "description": "What the map shows: this week's forecast risk, the hazard events nearby, or both",
+            "enum": [
+              "both",
+              "week",
+              "hazards"
+            ],
+            "title": "Focus",
+            "type": "string"
+          },
+          "layer": {
+            "default": "risk",
+            "description": "The forecast field the map opens on, under the hazard events: the risk (default), or the precipitation, temperature or wind forecast when the question is about the weather itself. The reader can switch between them on the map",
+            "enum": [
+              "risk",
+              "precipitation",
+              "temperature",
+              "wind"
+            ],
+            "title": "Layer",
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "title": "show_risk_mapArguments"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true,
+        "title": "Map of the risk around a place"
+      }
+    },
+    {
+      "name": "find_place",
+      "title": "Find a place",
+      "description": "Candidate coordinates for a place name or address, best match first, each with its full name and kind (city, state, road and so on).\n\nCall it when a name is ambiguous (several Springfields) and the right candidate must be chosen, or when one place is the subject of several calls and its coordinates should be looked up once. The other place tools take a name themselves and use its best match, so a single question about an unambiguous place needs no find_place first.\n\nIt queries OpenStreetMap Nominatim (ODbL) through Criora's geocoder, which every user shares and which sends one request a second: a burst of calls waits its turn, and a name looked up in the last week is answered from a cache. A name that matches nothing returns an empty list. A city resolves to its centre as OpenStreetMap maps it.",
+      "inputSchema": {
+        "properties": {
+          "query": {
+            "description": "A place name or address, in any language",
+            "title": "Query",
+            "type": "string"
+          },
+          "limit": {
+            "default": 5,
+            "description": "How many candidates to return",
+            "maximum": 10,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "type": "object",
+        "title": "find_placeArguments"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true,
+        "title": "Find a place"
+      }
+    },
+    {
+      "name": "get_forecast",
+      "title": "Seven-day forecast and weather risk",
+      "description": "This week's forecast at a place by local day: minimum and maximum temperature, peak precipitation rate, peak wind, and the day's forecast risk class with the hazard behind it (heat, cold, wind, rain, snow, freezing rain) and its physical reading (UTCI felt temperature, gust speed or rain rate).\n\nUse it for the weather or the weather risk in the next seven days: it answers that at a third of the size of assess_place, with every step on request. For events already happening (fires, floods, earthquakes) use get_hazards_near; for what a place is exposed to over years, get_climate_profile.\n\nGive latitude and longitude, or place, which costs a lookup in the shared geocoder; with both, the coordinates are used. hourly=true adds every forecast step to the daily summary.\n\nSteps are hourly for the first day, then 3-hourly, then 6-hourly to day seven, and each day gives its step_hours: from the fourth day the minimum and maximum are of 6-hourly steps, so the true peak can fall between two of them. A day marked partial is cut by the start or end of the window. Source: Environment and Climate Change Canada GDPS global model, read at its own 15 km cell containing the point.",
+      "inputSchema": {
+        "properties": {
+          "latitude": {
+            "anyOf": [
+              {
+                "maximum": 90,
+                "minimum": -90,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Latitude of the place asked about, in degrees, WGS84. Give it with longitude, or give place instead",
+            "title": "Latitude"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "maximum": 180,
+                "minimum": -180,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Longitude of the place asked about, in degrees, WGS84. Give it with latitude, or give place instead",
+            "title": "Longitude"
+          },
+          "place": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "A place name or address, used only when latitude and longitude are not given. It is resolved to its best match by a geocoder shared by every user and limited to one lookup a second, so pass coordinates when you have them",
+            "title": "Place"
+          },
+          "hourly": {
+            "default": false,
+            "description": "Add every forecast step, hour by hour where the model has them, to the daily summary",
+            "title": "Hourly",
+            "type": "boolean"
+          }
+        },
+        "type": "object",
+        "title": "get_forecastArguments"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true,
+        "title": "Seven-day forecast and weather risk"
+      }
+    },
+    {
+      "name": "get_climate_profile",
+      "title": "Long-term climate profile",
+      "description": "Long-term climate exposure at a place: every climate layer on the Criora map, read at the point.\n\nERA5 extremes of the latest full year, CMIP6 warming and rainfall change to 2050 and 2080, flood depth by scenario, sea level rise, water stress, drought, aridity, burned area, land cover, elevation, subsidence and the Köppen zone. Each layer gives its year, unit, cell size and readings by band, and names its source, whose institution, licence and link are given once in sources.\n\nUse it for what a place is exposed to over years, and once per place to compare places. It has every layer where assess_place has the headline ones, and is larger for it, so pass categories when the question is about one kind of exposure. For this week's weather use get_forecast; for events happening now, get_hazards_near.\n\nGive latitude and longitude, or place, which costs a lookup in the shared geocoder. With both, the coordinates are used and place only names the map, at no lookup: pass the name the user knows the place by, or the map is titled by its coordinates and country.",
+      "inputSchema": {
+        "properties": {
+          "latitude": {
+            "anyOf": [
+              {
+                "maximum": 90,
+                "minimum": -90,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Latitude of the place asked about, in degrees, WGS84. Give it with longitude, or give place instead",
+            "title": "Latitude"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "maximum": 180,
+                "minimum": -180,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Longitude of the place asked about, in degrees, WGS84. Give it with latitude, or give place instead",
+            "title": "Longitude"
+          },
+          "place": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "A place name or address, used only when latitude and longitude are not given. It is resolved to its best match by a geocoder shared by every user and limited to one lookup a second, so pass coordinates when you have them",
+            "title": "Place"
+          },
+          "categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "enum": [
+                    "temperature",
+                    "precipitation",
+                    "wind",
+                    "water",
+                    "flooding",
+                    "vegetation",
+                    "misc",
+                    "terrain",
+                    "landcover"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only the layers of these categories, e.g. flooding for flood depth and sea level rise, temperature for heat; every layer when omitted",
+            "title": "Categories"
+          }
+        },
+        "type": "object",
+        "title": "get_climate_profileArguments"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true,
+        "title": "Long-term climate profile"
+      }
+    },
+    {
+      "name": "get_hazards_near",
+      "title": "Hazard events near a place",
+      "description": "Disasters and hazards happening now or recently near a place, most severe and most recent first, each with its distance, bearing, severity and time.\n\nWildfires (NASA FIRMS), earthquakes, floods, tropical cyclones, volcanic eruptions and droughts (GDACS), US National Weather Service flood, tropical cyclone and fire warnings, and air quality (OpenAQ reference monitors).\n\nUse it for what is happening there now: it answers that at a fraction of the size of assess_place, and the radius, event types and period can be chosen. For the weather forecast use get_forecast; for long-term exposure, get_climate_profile.\n\nGive latitude and longitude, or place, which costs a lookup in the shared geocoder; with both, the coordinates are used. Without radius_km every event type is searched at the largest distance, which radius_used_km reports. The most severe and most recent events are listed, and total and counts_by_type cover every event found.",
+      "inputSchema": {
+        "properties": {
+          "latitude": {
+            "anyOf": [
+              {
+                "maximum": 90,
+                "minimum": -90,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Latitude of the place asked about, in degrees, WGS84. Give it with longitude, or give place instead",
+            "title": "Latitude"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "maximum": 180,
+                "minimum": -180,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Longitude of the place asked about, in degrees, WGS84. Give it with latitude, or give place instead",
+            "title": "Longitude"
+          },
+          "place": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "A place name or address, used only when latitude and longitude are not given. It is resolved to its best match by a geocoder shared by every user and limited to one lookup a second, so pass coordinates when you have them",
+            "title": "Place"
+          },
+          "radius_km": {
+            "anyOf": [
+              {
+                "maximum": 500.0,
+                "minimum": 1,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Search radius in km, 1 to 500; the largest when omitted",
+            "title": "Radius Km"
+          },
+          "event_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "enum": [
+                    "wildfire",
+                    "earthquake",
+                    "flood",
+                    "cyclone",
+                    "volcano",
+                    "drought",
+                    "air_quality"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only these kinds of event; every kind when omitted",
+            "title": "Event Types"
+          },
+          "days": {
+            "anyOf": [
+              {
+                "maximum": 30,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only events of the last N days, 1 to 30; all current when omitted",
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "title": "get_hazards_nearArguments"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true,
+        "title": "Hazard events near a place"
+      }
+    },
+    {
+      "name": "get_country_profile",
+      "title": "Country climate and disaster risk profile",
+      "description": "A country's climate and disaster risk from the Criora Atlas: overall risk score, class and rank among all countries, the climate, nature, social, governance and adaptation scores and classes, and its income group and region.\n\nUse it for one country in depth. For several named countries side by side use compare_countries; to find which countries are most or least at risk, rank_countries; for a place inside a country, the place tools.\n\nThe country is an ISO 3166-1 alpha-3 code or its English name; an unknown one is refused with the expected form. Scores run 0 to 100; higher means more risk.\n\ninclude_indicators=true adds, per dimension, the indicators where the country is furthest from the world median, first (INFORM Risk Index, ND-GAIN, World Bank), each with its value, year, source and the medians of the world and of the country's own region, subregion and income group, the ones meta names. indicators_limit sets how many are listed per dimension, and total counts each dimension's indicators.",
+      "inputSchema": {
+        "properties": {
+          "country": {
+            "description": "ISO 3166-1 alpha-3 code (e.g. BGD) or English country name",
+            "title": "Country",
+            "type": "string"
+          },
+          "include_indicators": {
+            "default": false,
+            "description": "Add the underlying indicators, the furthest from the world median first, each with its world and regional medians; the scores alone when false",
+            "title": "Include Indicators",
+            "type": "boolean"
+          },
+          "indicators_limit": {
+            "default": 8,
+            "description": "With include_indicators, how many indicators to list per dimension",
+            "maximum": 60,
+            "minimum": 1,
+            "title": "Indicators Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "country"
+        ],
+        "type": "object",
+        "title": "get_country_profileArguments"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true,
+        "title": "Country climate and disaster risk profile"
+      }
+    },
+    {
+      "name": "compare_countries",
+      "title": "Compare countries",
+      "description": "Two to ten named countries side by side: each one's overall risk score and class, its climate, nature, social, governance and adaptation scores, and its rank by overall risk.\n\nUse it when the countries are known in advance. To find the countries most or least at risk, optionally within a region or income group, use rank_countries; for one country's underlying indicators, get_country_profile.\n\nCountries are ISO 3166-1 alpha-3 codes or English names; an unknown one is refused with the expected form. Scores run 0 to 100; higher means more risk. Ranks are among all countries in the Criora Atlas, 1 being the highest risk.",
+      "inputSchema": {
+        "properties": {
+          "countries": {
+            "description": "ISO3 codes or English names of 2 to 10 countries",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "minItems": 2,
+            "title": "Countries",
+            "type": "array"
+          }
+        },
+        "required": [
+          "countries"
+        ],
+        "type": "object",
+        "title": "compare_countriesArguments"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true,
+        "title": "Compare countries"
+      }
+    },
+    {
+      "name": "rank_countries",
+      "title": "Rank countries by risk",
+      "description": "The countries most or least at risk, overall or on one risk dimension, each with its score, risk class and rank, optionally only those in a region, subregion or income group.\n\nAnswers \"which countries are most exposed to climate risk\", \"the riskiest countries in Southern Asia\" or \"low-income countries with the lowest adaptation score\". For countries named in advance use compare_countries; for one country in depth, get_country_profile.\n\nRegions, subregions and income groups are named as the countries' meta names them; a name no country has is refused with the names there are. The filters combine, and a combination that matches nothing returns an empty list; limit cuts the list, while matched counts every country that passed the filters. Scores run 0 to 100; higher means more risk. Each country's rank is among all countries in the Criora Atlas, 1 being the highest risk: a filter narrows the list but not the rank. Countries without a score on the dimension are not ranked and are counted in no_score.",
+      "inputSchema": {
+        "properties": {
+          "dimension": {
+            "default": "overall",
+            "description": "The score to rank by",
+            "enum": [
+              "overall",
+              "climate",
+              "nature",
+              "social",
+              "governance",
+              "adaptation"
+            ],
+            "title": "Dimension",
+            "type": "string"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only countries in this UN region, e.g. Asia",
+            "title": "Region"
+          },
+          "subregion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only countries in this UN M49 subregion, e.g. Southern Asia",
+            "title": "Subregion"
+          },
+          "income_group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only countries in this World Bank income group, e.g. Low income",
+            "title": "Income Group"
+          },
+          "order": {
+            "default": "highest_risk",
+            "description": "Most at risk first, or least at risk first",
+            "enum": [
+              "highest_risk",
+              "lowest_risk"
+            ],
+            "title": "Order",
+            "type": "string"
+          },
+          "limit": {
+            "default": 10,
+            "description": "How many countries to list",
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "type": "object",
+        "title": "rank_countriesArguments"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true,
+        "title": "Rank countries by risk"
+      }
+    },
+    {
+      "name": "assess_place",
+      "title": "Risk overview of a place",
+      "description": "One answer for an open question about one place (\"is it safe there\", \"what are the risks\"): this week's forecast risk by day, hazard events nearby, the headline climate exposures (heat, flood, sea-level rise, water stress, drought, heavy rain, fire, climate zone) and the risk profile of the country it lies in.\n\nFor a specific question, call the single tool instead, which answers it in full: this week's weather, get_forecast; events happening now, get_hazards_near; long-term exposure, get_climate_profile, which has every climate layer where this has the headline ones; the country, get_country_profile. It answers for one place: places are compared on get_climate_profile, one call each, layer by layer, and countries on compare_countries or rank_countries.\n\nGive latitude and longitude, or place, which costs a lookup in the shared geocoder. With both, the coordinates are used and place only names the map, at no lookup: pass the name the user knows the place by, or the map is titled by its coordinates and country.",
+      "inputSchema": {
+        "properties": {
+          "latitude": {
+            "anyOf": [
+              {
+                "maximum": 90,
+                "minimum": -90,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Latitude of the place asked about, in degrees, WGS84. Give it with longitude, or give place instead",
+            "title": "Latitude"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "maximum": 180,
+                "minimum": -180,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Longitude of the place asked about, in degrees, WGS84. Give it with latitude, or give place instead",
+            "title": "Longitude"
+          },
+          "place": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "A place name or address, used only when latitude and longitude are not given. It is resolved to its best match by a geocoder shared by every user and limited to one lookup a second, so pass coordinates when you have them",
+            "title": "Place"
+          }
+        },
+        "type": "object",
+        "title": "assess_placeArguments"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true,
+        "title": "Risk overview of a place"
+      }
+    },
+    {
+      "name": "search",
+      "title": "Search Criora",
+      "description": "Criora documents matching a query, each with the id fetch reads and the Criora page to cite: countries, places, and the pages on Criora's methodology and data sources.\n\nUse it to find what Criora has on a subject before reading it with fetch. For an answer in one call, the specific tools are shorter: assess_place for a place, get_country_profile for a country, rank_countries for the countries most at risk.\n\nA country is found by its ISO 3166-1 alpha-3 or alpha-2 code or its English name as the whole query, or by its name anywhere in it. The words methodology or sources find those pages. Only when nothing else matches is the query looked up as a place name, once, in the geocoder every user shares, which answers one lookup a second; a place is found best by its name alone. Nothing found is an empty list.",
+      "inputSchema": {
+        "properties": {
+          "query": {
+            "description": "A country, a place name, or a subject such as methodology or data sources",
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "type": "object",
+        "title": "searchArguments"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true,
+        "title": "Search Criora"
+      }
+    },
+    {
+      "name": "fetch",
+      "title": "Read a Criora document",
+      "description": "One Criora document as markdown, with its title, the Criora page to cite and the sources it draws on, by an id search returned.\n\ncountry:<ISO3> (country:BGD) gives the country's overall risk score, class and rank, each dimension with its class, its most notable indicators against the world and regional medians, and the sources with their dates. place:<latitude>,<longitude> (place:23.8103,90.4125) gives this week's forecast risk by day, the five most notable hazard events nearby, the headline climate exposures and the country. page:methodology and page:sources are those pages of the site.\n\nUse it to read a document for research and cite it. The specific tools answer with every figure as data: get_country_profile, assess_place and the rest. An id of another form is refused with the forms it takes. A long text is cut at a paragraph, with the page that has the rest.",
+      "inputSchema": {
+        "properties": {
+          "id": {
+            "description": "An id search returned: country:<ISO3>, place:<latitude>,<longitude> or page:<name>",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "title": "fetchArguments"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true,
+        "title": "Read a Criora document"
+      }
+    }
+  ],
+  "resources": [
+    {
+      "uri": "criora://methodology",
+      "name": "methodology",
+      "description": "Criora Atlas methodology: how country risk is scored, as markdown, as the site renders it at https://criora.com/atlas/methodology",
+      "mimeType": "text/markdown"
+    },
+    {
+      "uri": "criora://sources",
+      "name": "sources",
+      "description": "Criora data sources: every dataset behind the scores and the map, as markdown, as the site renders it at https://criora.com/docs/references/data-sources",
+      "mimeType": "text/markdown"
+    },
+    {
+      "uriTemplate": "criora://country/{iso3}",
+      "name": "country",
+      "description": "A country's risk profile from the Criora Atlas, as get_country_profile answers it without indicators: overall score, class and rank, the dimension scores and classes, region and income group. iso3 is an ISO 3166-1 alpha-3 code such as BGD.",
+      "mimeType": "application/json"
+    }
+  ],
+  "prompts": [
+    {
+      "name": "assess_trip",
+      "title": "Assess a trip",
+      "description": "How risky a trip is: the weather risk on the travel days, hazards nearby, and what the place is exposed to at that time of year.",
+      "arguments": [
+        {
+          "description": "Where the trip goes, e.g. Seville, Spain",
+          "name": "destination",
+          "required": true
+        },
+        {
+          "description": "When, e.g. 3 to 6 October 2026",
+          "name": "dates",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "compare_places_to_live",
+      "title": "Compare places to live",
+      "description": "Where to live: long-term climate exposure and country risk of several places side by side.",
+      "arguments": [
+        {
+          "description": "Two or more places, separated by semicolons",
+          "name": "places",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "country_briefing",
+      "title": "Country risk briefing",
+      "description": "A briefing on one country's climate and disaster risk, against its region and the world.",
+      "arguments": [
+        {
+          "description": "Country name or ISO 3166-1 alpha-3 code",
+          "name": "country",
+          "required": true
+        }
+      ]
+    }
+  ]
+}
