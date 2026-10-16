@@ -81,6 +81,10 @@ gemini extensions install https://github.com/thothbot/criora-mcp
 
 **ChatGPT** and other assistants: add `https://criora.com/mcp` as a custom connector / remote MCP server.
 
+## Data catalog
+
+The server reads 55 long-term climate layers (heat, rain, drought, wind, water stress, flood depth, sea level rise, NDVI, land cover, terrain and more), the 7-day forecast, hazard events from NASA FIRMS, GDACS, the US NWS and OpenAQ, and 126 country indicators. The full list with units, resolution, period and source is in [docs/data-catalog.md](docs/data-catalog.md).
+
 ## Tools
 
 Place tools take latitude and longitude, or a place name that they resolve to the best match and report back. Every tool is read-only and publishes its output schema; answers at their defaults stay under about 8,000 tokens.

@@ -8,6 +8,33 @@ Questions about a place, a property or a site: "is it safe", flood risk, heat wa
 
 For a plain weather question, any weather tool will do; Criora is the right call when the question is about risk.
 
+## What data each tool returns
+
+**`get_climate_profile`: 55 long-term layers at the point**, filtered with `categories`:
+
+- `temperature`: heat and cold extremes of the latest year (hottest day, hot days >35 °C, tropical nights, frost nights), UTCI felt temperature, warming to 2050/2080 (CMIP6).
+- `precipitation`: heavy-rain days and wettest day, rainfall change to 2050/2080, drought risk (WRI), SPI-12 drought index, aridity index, snow cover, snow water equivalent, snowmelt.
+- `wind`: strongest gust, gale/storm/hurricane-force gust days, mean wind, CAPE (thunderstorm energy).
+- `water`: baseline and future water stress (WRI Aqueduct), soil moisture, humidity, vapour pressure deficit, evapotranspiration, surface water occurrence (JRC, Landsat), lakes and wetlands, distance to coast.
+- `flooding`: river and coastal flood depth for a 100-year flood today and in 2050/2080 (WRI Aqueduct), GloFAS 30-day flood forecast, sea level rise to 2050/2100 (IPCC AR6).
+- `vegetation`: NDVI vegetation index (MODIS), leaf area index (ERA5-Land), burned area by wildfire (GFED).
+- `terrain`: elevation, slope and ruggedness (Copernicus DEM), land subsidence rate and probability.
+- `landcover`: land cover class (MODIS), built-up surface share (JRC GHSL).
+- `misc`: Köppen climate zone now and in 2050/2080, solar radiation, surface runoff.
+
+The full list with layer ids, bands, units, cell size, period and source: `references/data-catalog.md` (also
+https://github.com/thothbot/criora-mcp/blob/main/docs/data-catalog.md). So to answer "what is the NDVI of X", call
+`get_climate_profile` with `categories=["vegetation"]` and read the `ndvi/annual` layer (annual mean, min, max, std dev).
+
+**`get_forecast`**: 7 days, per day min/max temperature, peak rain rate, peak gust and a risk class with its hazard.
+**`get_hazards_near`**: wildfires (NASA FIRMS), earthquakes, floods, tropical cyclones, volcanoes and droughts (GDACS),
+US NWS warnings, air quality (OpenAQ), with severity, distance and time.
+**Country tools**: 194 countries, overall score and five dimensions (climate, nature, social, governance, adaptation),
+126 indicators from the INFORM Risk Index, ND-GAIN and the World Bank.
+
+Limits: climate layers are read at one raster cell (0.25 to 111 km, given as `cell_km`); NDVI and ERA5 layers are annual,
+not current; there is no imagery and no time series.
+
 ## Which tool
 
 - `assess_place`: the first call for a general question about one place ("is it safe", "what are the risks"). This week's forecast risk by day, hazards nearby, headline climate exposure and the country's risk.
