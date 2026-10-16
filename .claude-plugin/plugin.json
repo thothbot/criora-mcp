@@ -25,5 +25,9 @@
     "due-diligence",
     "travel-safety",
     "mcp"
-  ]
+  ],
+  "documentationUrl": "https://criora.com/docs/references/api-and-agents",
+  "supportUrl": "https://github.com/thothbot/criora-mcp/issues",
+  "privacyPolicyUrl": "https://criora.com/privacy",
+  "termsOfServiceUrl": "https://criora.com/terms"
 }
