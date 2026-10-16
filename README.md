@@ -32,6 +32,28 @@ claude mcp add --transport http criora https://criora.com/mcp
 }
 ```
 
+**Google Antigravity** (App, CLI, IDE): install the plugin from this repository (MCP server plus a skill that tells the agent when to use which tool):
+
+```bash
+agy plugin install https://github.com/thothbot/criora-mcp
+```
+
+or add the server to `mcp_config.json` yourself:
+
+```json
+{
+  "mcpServers": {
+    "criora": { "serverUrl": "https://criora.com/mcp" }
+  }
+}
+```
+
+**Gemini CLI:**
+
+```bash
+gemini extensions install https://github.com/thothbot/criora-mcp
+```
+
 **VS Code** (`.vscode/mcp.json`):
 
 ```json
