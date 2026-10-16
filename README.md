@@ -1,6 +1,7 @@
 # Criora — climate and disaster risk MCP server
 
 [![Criora MCP connector](https://glama.ai/mcp/connectors/com.criora/criora/badges/score.svg)](https://glama.ai/mcp/connectors/com.criora/criora)
+[![M8ven Verified](https://m8ven.ai/badge/mcp/thothbot-criora-mcp-i8tnim?v=419f3f3e004edbd5e8b48ab09c3c542e&variant=verified)](https://m8ven.ai/mcp/thothbot-criora-mcp-i8tnim?s=readme)
 
 Criora is a hosted, remote [Model Context Protocol](https://modelcontextprotocol.io) server that answers climate and disaster risk questions for any place on Earth: this week's weather risk, hazards happening nearby, long-term climate exposure and country risk. In assistants that display MCP Apps, such as Claude, it can also show an interactive map of the place right in the conversation.
 
