@@ -1,6 +1,6 @@
 {
   "name": "criora",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Climate and disaster risk for any place or property: floods, heat waves, storms, hurricanes, wildfires, earthquakes, sea level rise, 7-day weather risk and country risk for 194 countries. Hosted MCP server plus a skill; free, no API key.",
   "author": {
     "name": "Criora",
@@ -8,6 +8,7 @@
     "url": "https://criora.com"
   },
   "homepage": "https://criora.com/docs/references/api-and-agents",
+  "icon": "./icon.png",
   "repository": "https://github.com/thothbot/criora-mcp",
   "license": "MIT",
   "keywords": [

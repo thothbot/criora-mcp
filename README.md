@@ -160,6 +160,10 @@ Every answer names its source. Main sources: forecast from Environment and Clima
 
 The same data is available as a plain JSON API under `https://criora.com/api/v1`. See [Data API and AI agents](https://criora.com/docs/references/api-and-agents).
 
+## What is sent
+
+The plugin runs nothing on your machine: it adds the hosted server and a skill that tells Claude when to use it. When Claude calls a Criora tool, the tool's arguments (a place name or coordinates, a country, a search phrase) go to `https://criora.com/mcp` over HTTPS, with the usual request data (IP address, client name and user agent). Criora logs these requests to run and secure the service and keeps the logs for up to 30 days. Place names are looked up with OpenStreetMap Nominatim; nothing else is passed on. No account, API key or other personal data is asked for.
+
 ## Terms
 
 Criora publishes data, not advice. Use of the service is governed by the [Terms of Service](https://criora.com/terms) and the [Privacy Policy](https://criora.com/privacy). When you publish or redistribute data from Criora, credit Criora and follow the licence of the source each answer names.
@@ -168,6 +172,7 @@ The [MIT licence](LICENSE) in this repository covers the files in this repositor
 
 ## Changelog
 
+- **1.4.1** (2026-10-18, Claude Code plugin only; the server stays 1.4.0): the plugin manifest names its icon (`./icon.png`), and this README says what is sent.
 - **1.4.0** (2026-10-16): the tools say what data they hold: `get_climate_profile` takes `layers` by id (55 layers, e.g. `ndvi/annual`) and its `categories` argument lists each category's layers; resources `criora://layers` and `criora://indicators`; `search`/`fetch` find the data catalogue (`catalog:layers`, `catalog:indicators`); descriptions and titles rewritten to the directories' rules; prompts `site_due_diligence` and `esg_country_screen`.
 - **1.3.1** (2026-10-15): the map card redesigned to the hosts' own look, in the card and full screen, with the week's timeline under the field switch; clearer hazard icons; Very low in the risk key; a lighter risk wash so the land shows; the forecast read is retried after a failure; the map keeps drawing when a host reports the card off screen; the server description names the map.
 - **1.3.0** (2026-10-15): `show_risk_map`, an interactive map of a place in the chat (risk, rain, temperature, wind).
