@@ -84,17 +84,22 @@ temperature, peak precipitation rate, peak wind gust, and a risk class (Very low
 hazard behind it (heat, cold, wind, rain, snow, freezing rain) and its reading (UTCI felt temperature, gust m/s, rain
 rate mm/h). `hourly=true` adds every step. `show_risk_map` draws the same forecast (risk, rain, temperature, wind).
 
-## 3. Hazard events happening now — `get_hazards_near`
+## 3. Hazard events and warnings in force — `get_hazards_near`, `list_hazards`
 
 | Event type | Source |
 |---|---|
-| wildfire | NASA FIRMS active fire detections |
-| earthquake, flood, cyclone (hurricanes, typhoons), volcano, drought | GDACS (EC JRC / UN OCHA) |
-| flood, tropical cyclone and fire warnings (US) | US National Weather Service |
+| official warnings for every natural hazard (US) | US National Weather Service |
+| official warnings in Europe (wind, snow and ice, thunderstorms, fog, heat, cold, coastal, rain, flood, fire danger, avalanche) | MeteoAlarm national services, through WMO WIS2 |
+| earthquake (depth, felt reports, intensity, PAGER alert) | USGS |
+| tsunami bulletins | NOAA tsunami warning centres |
+| tropical cyclones (Atlantic, East and Central Pacific) with cone and forecast track | NOAA National Hurricane Center |
+| tropical cyclones elsewhere, flood, volcano, drought | GDACS (EC JRC / UN OCHA) |
+| wildfire | NASA FIRMS active fire detections (VIIRS, MODIS) |
 | air_quality | OpenAQ reference monitors |
 
-Each event: type, severity (low, medium, high, critical), distance and bearing from the point, time; radius 1-500 km,
-last 1-30 days.
+Each event: kind (occurrence or warning), type, severity (low, medium, high, critical), time; a warning also its issuer,
+onset and expiry and whether the place lies inside its area (`get_hazards_near`). `get_hazards_near` searches a radius
+of 1-500 km over the last 1-30 days; `list_hazards` covers a country or territory, a region (`bbox`) or the world.
 
 ## 4. Country risk — `get_country_profile`, `compare_countries`, `rank_countries`
 

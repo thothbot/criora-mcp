@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "com.criora/criora",
   "title": "Criora climate risk",
-  "description": "Climate and disaster risk for any place: floods, heat, storms, wildfires, quakes, country risk, map",
-  "version": "1.4.0",
+  "description": "Climate and disaster risk for any place: warnings, floods, heat, storms, quakes, countries, map",
+  "version": "1.5.0",
   "websiteUrl": "https://criora.com/docs/references/api-and-agents",
   "repository": {
     "url": "https://github.com/thothbot/criora-mcp",

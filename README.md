@@ -3,7 +3,7 @@
 [![Criora MCP connector](https://glama.ai/mcp/connectors/com.criora/criora/badges/score.svg)](https://glama.ai/mcp/connectors/com.criora/criora)
 [![M8ven Verified](https://m8ven.ai/badge/mcp/thothbot-criora-mcp-i8tnim?v=419f3f3e004edbd5e8b48ab09c3c542e&variant=verified)](https://m8ven.ai/mcp/thothbot-criora-mcp-i8tnim?s=readme)
 
-Criora is a hosted, remote [Model Context Protocol](https://modelcontextprotocol.io) server that answers climate and disaster risk questions for any place on Earth: this week's weather risk, hazards happening nearby, long-term climate exposure and country risk. In assistants that display MCP Apps, such as Claude, it can also show an interactive map of the place right in the conversation.
+Criora is a hosted, remote [Model Context Protocol](https://modelcontextprotocol.io) server that answers climate and disaster risk questions for any place on Earth: this week's weather risk, official warnings and disasters near a place or across a country, a region or the world, long-term climate exposure and country risk. In assistants that display MCP Apps, such as Claude, it can also show an interactive map of the place right in the conversation.
 
 - **Endpoint:** `https://criora.com/mcp`
 - **Transport:** Streamable HTTP
@@ -19,7 +19,7 @@ This repository holds the documentation and registry metadata for the hosted ser
 - **Property, real estate and site due diligence:** flood risk (river and coastal flood depth by scenario), sea level rise, extreme heat, drought, water stress, wildfire and subsidence at an address or coordinates, with warming to 2050 and 2080.
 - **Relocation:** compare the long-term climate exposure of several cities side by side.
 - **ESG, insurance and investment research:** country climate and disaster risk for 194 countries (INFORM Risk Index, ND-GAIN, World Bank), rankings within a region or income group, ~160 indicators against regional and world benchmarks.
-- **Disaster monitoring:** wildfires, earthquakes, floods, hurricanes and typhoons, volcanoes, droughts and air quality near any place right now.
+- **Disaster monitoring and warnings:** official weather warnings (US National Weather Service, MeteoAlarm across Europe), earthquakes, hurricanes and typhoons with their forecast cone, wildfires, floods, volcanoes, tsunami bulletins and air quality, near a place or across a country, a region or the world.
 
 ## Connect
 
@@ -84,7 +84,7 @@ gemini extensions install https://github.com/thothbot/criora-mcp
 
 ## Data catalog
 
-The server reads 55 long-term climate layers (heat, rain, drought, wind, water stress, flood depth, sea level rise, NDVI, land cover, terrain and more), the 7-day forecast, hazard events from NASA FIRMS, GDACS, the US NWS and OpenAQ, and 126 country indicators. The full list with units, resolution, period and source is in [docs/data-catalog.md](docs/data-catalog.md).
+The server reads 55 long-term climate layers (heat, rain, drought, wind, water stress, flood depth, sea level rise, NDVI, land cover, terrain and more), the 7-day forecast, hazard events and official warnings from the US NWS, MeteoAlarm (via WMO WIS2), NOAA's tsunami centres, the NHC, USGS, GDACS, NASA FIRMS and OpenAQ, and 126 country indicators. The full list with units, resolution, period and source is in [docs/data-catalog.md](docs/data-catalog.md).
 
 ## Tools
 
@@ -94,7 +94,8 @@ Place tools take latitude and longitude, or a place name that they resolve to th
 | --- | --- |
 | `assess_place` | Everything about a place in one answer: forecast risk by day, hazards nearby, headline climate exposures and the country's risk profile. The best first call for a general question. |
 | `get_forecast` | Seven-day weather and weather risk, by local day or step by step. Each day carries a risk class with the hazard behind it (heat, cold, wind, rain, snow, freezing rain). |
-| `get_hazards_near` | Wildfires, earthquakes, floods, tropical cyclones, volcanic eruptions, droughts, US NWS warnings and air quality near a place, most severe and most recent first. |
+| `get_hazards_near` | What is happening now near a place: official warnings (US NWS; MeteoAlarm national services across Europe), earthquakes (USGS, with depth and felt reports), tsunami bulletins, tropical cyclones with the NHC cone and track, wildfires, floods, volcanoes, droughts and air quality. Says whether the place lies inside a warning's area. Most severe and most recent first. |
+| `list_hazards` | Every hazard and warning in force across a country or territory (by code or name), a region (`bbox`) or the whole world: "which red warnings are in force in Europe", "the strongest earthquakes this week". Filter by type, kind, severity and days. |
 | `get_climate_profile` | Long-term exposure from 55 layers: flood depth, sea level rise, heat, drought, water stress, wind, NDVI and other satellite layers, terrain, land cover, with warming and rainfall change projected to 2050 and 2080. Narrow it with `categories` or `layers` (ids in `criora://layers`). |
 | `get_country_profile` | A country's overall risk score and its climate, nature, social, governance and adaptation scores; on request about 160 indicators with world and regional benchmarks. |
 | `compare_countries` | Two to ten countries side by side on overall risk and each dimension, with their ranks. |
@@ -102,15 +103,16 @@ Place tools take latitude and longitude, or a place name that they resolve to th
 | `find_place` | Coordinates for a place name, when a name is ambiguous. |
 | `search` | Find countries, places and Criora reference pages by name; returns ids for `fetch`. Built to the shape ChatGPT deep research and company knowledge expect. |
 | `fetch` | A readable document for a `search` id (`country:BGD`, `place:<lat>,<lon>`, `page:methodology`), with a link to the Criora page it comes from. |
-| `show_risk_map` | An interactive map of a place in the conversation: this week's forecast risk, or the rain, temperature or wind forecast hour by hour, under the hazards nearby. Clients without apps get the same summary as text. |
+| `show_risk_map` | An interactive map of a place in the conversation: this week's forecast risk, or the rain, temperature or wind forecast hour by hour, under the hazards nearby, with official warning areas and storm cones drawn. Clients without apps get the same summary as text. |
 
 ## Interactive map
 
-`show_risk_map` is an [MCP App](https://modelcontextprotocol.io/docs/extensions/apps): in clients that display apps (Claude on the web, desktop and mobile, and other MCP Apps hosts) it draws a map under the answer, on NASA Blue Marble imagery:
+`show_risk_map` is an [MCP App](https://modelcontextprotocol.io/docs/extensions/apps): in clients that display apps (Claude on the web, desktop and mobile, and other MCP Apps hosts) it draws a map under the answer, on Criora's own Natural Earth ground:
 
 - this week's worst forecast risk with its hazard symbols, or one forecast hour of it;
 - the precipitation, temperature or wind forecast instead (`layer`), with animated wind streams and a key;
 - hazard events nearby as markers the reader can tap for the event's details;
+- official warning areas and hurricane cones and tracks, drawn as the Criora site draws them;
 - a timeline of the week under the field switch: the risk hour by hour with each day's main hazard, or the temperature, wind or rain at the place, with the reading for the hour shown.
 
 The reader can pan, zoom, open the map full screen, tap or scrub the timeline, play the week hour by hour and switch between the four fields; the map tells the assistant what the reader is looking at. The card follows the host's own theme and type, light or dark. Clients that do not display apps get the same answer as text, with a link to the place on Criora's own map.
@@ -145,11 +147,13 @@ The reader can pan, zoom, open the map full screen, tap or scrub the timeline, p
 - "Show me the wind forecast on a map around Brest."
 - "What is the flood risk and sea level rise exposure for a house in Rotterdam by 2050?"
 - "Is there a heat wave or a hurricane coming to Miami this week?"
+- "Which red weather warnings are in force in Europe right now?"
+- "What were the strongest earthquakes in the world this week?"
 - "Which low-income countries are most exposed to climate risk, for an ESG screen?"
 
 ## Data sources
 
-Every answer names its source. Main sources: forecast from Environment and Climate Change Canada; place names from OpenStreetMap Nominatim (ODbL); hazards from NASA FIRMS, GDACS, the US National Weather Service and OpenAQ; climate layers from ERA5, CMIP6 and IPCC AR6 among others; country indicators from the INFORM Risk Index, ND-GAIN and the World Bank. See [Data Sources](https://criora.com/docs/references/data-sources) for the full list and licences.
+Every answer names its source. Main sources: forecast from Environment and Climate Change Canada; place names from OpenStreetMap Nominatim (ODbL); hazards and warnings from the US National Weather Service, MeteoAlarm's national services (via WMO WIS2), the NOAA tsunami warning centres, the National Hurricane Center, USGS, GDACS, NASA FIRMS and OpenAQ; climate layers from ERA5, CMIP6 and IPCC AR6 among others; country indicators from the INFORM Risk Index, ND-GAIN and the World Bank. See [Data Sources](https://criora.com/docs/references/data-sources) for the full list and licences.
 
 ## Limits
 
@@ -172,6 +176,7 @@ The [MIT licence](LICENSE) in this repository covers the files in this repositor
 
 ## Changelog
 
+- **1.5.0** (2026-10-21): `list_hazards`, every hazard and warning in force in a country or territory, a region or the world. Official warnings from the US National Weather Service and, through WMO WIS2, MeteoAlarm's national services across Europe; NOAA tsunami bulletins; NHC storms with their cone and track; every USGS earthquake with its depth and felt reports. `get_hazards_near` says whether the place lies inside a warning's area, and a warning's own words come apart from its facts as `issuer_text`. The chat map draws warning areas and storm cones on its own Natural Earth ground. 12 tools plus 3 app-only ones (`get_map_events`, `get_map_warnings`, `get_map_event`).
 - **1.4.1** (2026-10-18, Claude Code plugin only; the server stays 1.4.0): the plugin manifest names its icon (`./icon.png`), and this README says what is sent.
 - **1.4.0** (2026-10-16): the tools say what data they hold: `get_climate_profile` takes `layers` by id (55 layers, e.g. `ndvi/annual`) and its `categories` argument lists each category's layers; resources `criora://layers` and `criora://indicators`; `search`/`fetch` find the data catalogue (`catalog:layers`, `catalog:indicators`); descriptions and titles rewritten to the directories' rules; prompts `site_due_diligence` and `esg_country_screen`.
 - **1.3.1** (2026-10-15): the map card redesigned to the hosts' own look, in the card and full screen, with the week's timeline under the field switch; clearer hazard icons; Very low in the risk key; a lighter risk wash so the land shows; the forecast read is retried after a failure; the map keeps drawing when a host reports the card off screen; the server description names the map.

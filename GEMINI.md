@@ -28,8 +28,10 @@ https://github.com/thothbot/criora-mcp/blob/main/docs/data-catalog.md). So to an
 resource `criora://layers`, or `fetch` with id `catalog:layers`.
 
 **`get_forecast`**: 7 days, per day min/max temperature, peak rain rate, peak gust and a risk class with its hazard.
-**`get_hazards_near`**: wildfires (NASA FIRMS), earthquakes, floods, tropical cyclones, volcanoes and droughts (GDACS),
-US NWS warnings, air quality (OpenAQ), with severity, distance and time.
+**`get_hazards_near`**: official warnings (US NWS, MeteoAlarm across Europe via WMO WIS2), earthquakes (USGS),
+tsunami bulletins (NOAA), tropical cyclones with cone and track (NHC, GDACS), wildfires (NASA FIRMS), floods, volcanoes
+and droughts (GDACS), air quality (OpenAQ), with severity, distance, time and whether the place is inside a warning.
+**`list_hazards`**: the same events and warnings across a country, a region (`bbox`) or the world.
 **Country tools**: 194 countries, overall score and five dimensions (climate, nature, social, governance, adaptation),
 126 indicators from the INFORM Risk Index, ND-GAIN and the World Bank.
 
@@ -40,7 +42,8 @@ not current; there is no imagery and no time series.
 
 - `assess_place`: the first call for a general question about one place ("is it safe", "what are the risks"). This week's forecast risk by day, hazards nearby, headline climate exposure and the country's risk.
 - `get_forecast`: 7-day weather and weather risk (heat and cold stress, wind gusts, heavy rain, snow).
-- `get_hazards_near`: events happening now near a point: wildfires, earthquakes, floods, tropical cyclones, volcanoes, droughts, air quality.
+- `get_hazards_near`: what is happening now near a point: official weather warnings, earthquakes, tsunami bulletins, tropical cyclones with their cone, wildfires, floods, volcanoes, droughts, air quality.
+- `list_hazards`: every warning and disaster in force across a country, a region or the world ("red warnings in Europe", "strongest earthquakes this week").
 - `get_climate_profile`: long-term exposure: flood depth, sea level rise, extreme heat, warming to 2050 and 2080, drought, water stress.
 - `get_country_profile`, `compare_countries`, `rank_countries`: one country, 2 to 10 side by side, or the most or least at risk.
 - `find_place`: resolve an ambiguous place name to coordinates first.
